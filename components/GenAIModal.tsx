@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { GoogleGenAI } from "@google/genai";
-import { X, Sparkles, Image as ImageIcon, Download, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Sparkles, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { ImageSize } from '../types';
 
 interface GenAIModalProps {
@@ -14,93 +13,28 @@ const GenAIModal: React.FC<GenAIModalProps> = ({ isOpen, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [needsKey, setNeedsKey] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      checkKeyStatus();
-    }
-  }, [isOpen]);
-
-  const checkKeyStatus = async () => {
-    if (window.aistudio && window.aistudio.hasSelectedApiKey) {
-      const hasKey = await window.aistudio.hasSelectedApiKey();
-      setNeedsKey(!hasKey);
-    }
-  };
-
-  const handleSelectKey = async () => {
-    if (window.aistudio && window.aistudio.openSelectKey) {
-      await window.aistudio.openSelectKey();
-      // Assume success after dialog interaction, or re-check
-      setNeedsKey(false);
-    }
-  };
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
     
-    // Safety check for API Key before starting
-    if (window.aistudio && window.aistudio.hasSelectedApiKey) {
-      const hasKey = await window.aistudio.hasSelectedApiKey();
-      if (!hasKey) {
-        setNeedsKey(true);
-        return;
-      }
-    }
-
     setIsLoading(true);
     setError(null);
     setGeneratedImageUrl(null);
 
     try {
-      // Initialize client RIGHT BEFORE the call to ensure we get the latest selected key
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // 模擬網路請求延遲 (Simulate network delay)
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-image-preview',
-        contents: {
-          parts: [
-            { text: prompt }
-          ]
-        },
-        config: {
-          imageConfig: {
-            imageSize: size,
-            aspectRatio: "1:1"
-          }
-        }
-      });
-
-      let foundImage = false;
-      if (response.candidates?.[0]?.content?.parts) {
-        for (const part of response.candidates[0].content.parts) {
-          if (part.inlineData && part.inlineData.data) {
-            const base64EncodeString = part.inlineData.data;
-            // Assuming PNG based on typical output, but could vary. 
-            // The API usually returns proper mimeType in inlineData.mimeType
-            const mimeType = part.inlineData.mimeType || 'image/png';
-            const imageUrl = `data:${mimeType};base64,${base64EncodeString}`;
-            setGeneratedImageUrl(imageUrl);
-            foundImage = true;
-            break;
-          }
-        }
-      }
-
-      if (!foundImage) {
-        throw new Error("No image data found in response.");
-      }
+      // 使用 Unsplash 的隨機咖啡圖片作為模擬結果
+      // 加上隨機參數讓每次看起來有點不同
+      const randomSig = Math.floor(Math.random() * 1000);
+      const mockImage = `https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=600&auto=format&fit=crop&sig=${randomSig}`;
+      
+      setGeneratedImageUrl(mockImage);
 
     } catch (err: any) {
       console.error("Generation failed:", err);
-      // Check for specific error related to missing key or resource not found
-      if (err.message && err.message.includes("Requested entity was not found")) {
-          setNeedsKey(true);
-          setError("Session expired or key invalid. Please select your API key again.");
-      } else {
-          setError(err.message || "Failed to generate image. Please try again.");
-      }
+      setError("Failed to generate image. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +50,7 @@ const GenAIModal: React.FC<GenAIModalProps> = ({ isOpen, onClose }) => {
         <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-orange-500 text-white">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5" />
-            <h2 className="font-bold text-lg">AI 創意特調</h2>
+            <h2 className="font-bold text-lg">AI 創意特調 (體驗版)</h2>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-orange-600 rounded-full transition-colors">
             <X className="w-6 h-6" />
@@ -126,23 +60,6 @@ const GenAIModal: React.FC<GenAIModalProps> = ({ isOpen, onClose }) => {
         {/* Content */}
         <div className="p-6 flex-1 overflow-y-auto">
           
-          {needsKey ? (
-             <div className="text-center py-8">
-                <div className="mb-4 text-gray-600">
-                  <p className="font-medium">需要設定 API 金鑰</p>
-                  <p className="text-sm mt-2">請選擇您的付費 Google Cloud 專案以使用 Gemini 3 Pro 圖像生成模型。</p>
-                  <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noopener noreferrer" className="text-xs text-blue-500 underline mt-1 block">
-                    查看計費說明
-                  </a>
-                </div>
-                <button 
-                  onClick={handleSelectKey}
-                  className="bg-orange-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-orange-600 transition-colors"
-                >
-                  選擇 API 金鑰
-                </button>
-             </div>
-          ) : (
             <>
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -188,7 +105,7 @@ const GenAIModal: React.FC<GenAIModalProps> = ({ isOpen, onClose }) => {
                    <div className="relative rounded-lg overflow-hidden border border-gray-200 shadow-sm">
                       <img src={generatedImageUrl} alt="Generated Drink" className="w-full h-auto object-contain" />
                    </div>
-                   <p className="text-xs text-center text-gray-400 mt-2">AI 生成圖片僅供參考</p>
+                   <p className="text-xs text-center text-gray-400 mt-2">AI 生成圖片僅供參考 (模擬展示)</p>
                 </div>
               ) : (
                 <div className="mb-6 h-64 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-400">
@@ -206,12 +123,10 @@ const GenAIModal: React.FC<GenAIModalProps> = ({ isOpen, onClose }) => {
                 </div>
               )}
             </>
-          )}
         </div>
 
         {/* Footer Actions */}
         <div className="p-4 border-t border-gray-100 bg-gray-50 flex gap-3">
-          {!needsKey && (
             <button
               onClick={handleGenerate}
               disabled={isLoading || !prompt.trim()}
@@ -223,7 +138,6 @@ const GenAIModal: React.FC<GenAIModalProps> = ({ isOpen, onClose }) => {
             >
               {isLoading ? '生成中...' : '開始生成'}
             </button>
-          )}
         </div>
       </div>
     </div>
