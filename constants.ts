@@ -133,4 +133,47 @@ export const MOCK_PRODUCTS: Product[] = [
     price: 40, tags: ['ice'],
     image: 'https://images.unsplash.com/photo-1564890369478-c5235089f6c8?q=80&w=300&auto=format&fit=crop'
   },
+  // Green Zone (Desserts)
+  {
+    id: '8',
+    name: '焦糖乳酪蛋糕',
+    categoryId: 'green',
+    price: 65,
+    image: 'https://i.imgur.com/WcOOO8A.png'
+  },
+  {
+    id: '9',
+    name: '黑森林波士頓派',
+    categoryId: 'green',
+    price: 80,
+    image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=300&auto=format&fit=crop'
+  },
+  {
+    id: '10',
+    name: '厚黑芝麻',
+    categoryId: 'green',
+    price: 65,
+    image: 'https://i.imgur.com/OM2Eo53.jpeg'
+  },
+  {
+    id: '11',
+    name: '輕乳酪焦糖布丁蛋糕',
+    categoryId: 'green',
+    price: 65,
+    image: 'https://i.imgur.com/N2sOdox.jpeg'
+  },
+  {
+    id: '12',
+    name: '白蘭地生巧克力蛋糕',
+    categoryId: 'green',
+    price: 75,
+    image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=300&auto=format&fit=crop'
+  },
+  {
+    id: '13',
+    name: '草莓乳酪慕斯蛋糕',
+    categoryId: 'green',
+    price: 75,
+    image: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?q=80&w=300&auto=format&fit=crop'
+  }
 ];

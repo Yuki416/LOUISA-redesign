@@ -22,3 +22,18 @@ export interface GeneratedImage {
   prompt: string;
   size: ImageSize;
 }
+
+export interface CartItem extends Product {
+  cartId: string; // Unique ID for the item in cart
+  quantity: number;
+  selectedPrice: number; // The price chosen (hot/cold/default)
+  type: 'hot' | 'ice' | 'default';
+}
+
+export interface Order {
+  id: string;
+  date: string;
+  items: CartItem[];
+  total: number;
+  status: 'completed' | 'processing' | 'cancelled';
+}
